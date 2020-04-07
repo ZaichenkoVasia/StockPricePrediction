@@ -27,6 +27,5 @@ hs_err_pid*
 /out/
 *.iml
 logs/
-*.class
 /target/
 *.png
