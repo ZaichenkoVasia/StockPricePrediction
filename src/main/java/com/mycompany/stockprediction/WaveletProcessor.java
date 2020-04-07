@@ -65,9 +65,7 @@ public class WaveletProcessor {
         WaveletCoefHandler.thresholding(lowArrHilb2D[level_decomposed], lowThreshold, level_decomposed, "hard");
         WaveletCoefHandler.thresholding(highArrHilb2D[level_decomposed], highThreshold, level_decomposed, "hard");
         WaveletCoefHandler.thresholding(volumeArrHilb2D[level_decomposed], volumeThreshold, level_decomposed, "hard");
-        
-        
-        
+
         double [] openArrReco = transform.recompose(openArrHilb2D, level_decomposed);
         double [] closeArrReco = transform.recompose(closeArrHilb2D, level_decomposed);
         double [] lowReco = transform.recompose(lowArrHilb2D, level_decomposed);

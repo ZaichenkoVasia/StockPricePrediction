@@ -49,7 +49,7 @@ public class StockPrediction {
         File locationToSave = new File("savedModels/" + fileName);
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
         // if not use saved model, train new model
-        if (!PropertiesUtil.getUseSavedModel()) {
+        if (PropertiesUtil.getUseSavedModel()) {
             System.out.println("starting to train LSTM networks with " + PropertiesUtil.getWaveletType() + " wavelet...");
             for (int i = 0; i < PropertiesUtil.getEpochs(); i++) {
                 System.out.println("training at epoch " + i);
@@ -108,8 +108,9 @@ public class StockPrediction {
 
         // plot predicts and actual values
         System.out.println("Starting to print out values.");
-        for (int i = 0; i < predicts.length; i++)
+        for (int i = 0; i < predicts.length; i++) {
             System.out.println("Prediction=" + predicts[i] + ", Actual=" + actuals[i]);
+        }
         System.out.println("Drawing chart...");
         plotAll(predicts, actuals, epochNum);
         System.out.println("Finished drawing...");
@@ -131,17 +132,30 @@ public class StockPrediction {
                         CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                         CSVWriter.DEFAULT_LINE_END);) {
 
-//		String[] titles = { "Open", "Close", "Low", "High", "VOLUME" };
-            String[] titles = {"Open", "Close", "Low", "High"};
-            for (int n = 0; n < PropertiesUtil.getVectorSize(); n++) {
-                double[] pred = new double[predicts.length];
-                double[] actu = new double[actuals.length];
+		String[] titles = { "PredictOpen", "ActualOpen", "PredictClose", "ActualClose", "PredictLow", "ActualLow", "PredictHigh", "ActualHigh"};
+            //String[] titles = {"Open", "Close", "Low", "High"};
+//            for (int n = 0; n < PropertiesUtil.getVectorSize(); n++) {
+//                double[] pred = new double[predicts.length];
+//                double[] actu = new double[actuals.length];
+//                for (int i = 0; i < predicts.length; i++) {
+//                    pred[i] = predicts[i].getDouble(n);
+//                    actu[i] = actuals[i].getDouble(n);
+//                    csvWriter.writeNext(new String[]{String.valueOf(pred[i]), String.valueOf(actu[i])});
+//                }
+//            }
+            csvWriter.writeNext(titles);
                 for (int i = 0; i < predicts.length; i++) {
-                    pred[i] = predicts[i].getDouble(n);
-                    actu[i] = actuals[i].getDouble(n);
-                    csvWriter.writeNext(new String[]{String.valueOf(pred[i]), String.valueOf(actu[i])});
+                    String predictOpen = String.valueOf(predicts[i].getDouble(0));
+                    String predictClose = String.valueOf(predicts[i].getDouble(1));
+                    String predictLow = String.valueOf(predicts[i].getDouble(2));
+                    String predictHigh = String.valueOf(predicts[i].getDouble(3));
+
+                    String actualOpen = String.valueOf(actuals[i].getDouble(0));
+                    String actualClose = String.valueOf(actuals[i].getDouble(1));
+                    String actualLow = String.valueOf(actuals[i].getDouble(2));
+                    String actualHigh = String.valueOf(actuals[i].getDouble(3));
+                    csvWriter.writeNext(new String[]{predictOpen, actualOpen, predictClose, actualClose, predictLow, actualLow, predictHigh, actualHigh});
                 }
-            }
             //DrawingTool.drawChart(pred, actu, titles[n], epochNum);
         } catch (IOException e) {
 			e.printStackTrace();
