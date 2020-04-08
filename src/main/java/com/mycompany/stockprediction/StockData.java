@@ -1,17 +1,14 @@
 package com.mycompany.stockprediction;
 
-/**
- * Java Bean for stock
- */
 public class StockData {
-    private String date; // date
-    private String symbol; // stock name
+    private String date;
+    private String symbol;
 
-    private double open; // open price
-    private double close; // close price
-    private double low; // low price
-    private double high; // high price
-    private double volume; // volume
+    private double open;
+    private double close;
+    private double low;
+    private double high;
+    private double volume;
 
     public StockData () {}
 
@@ -27,9 +24,6 @@ public class StockData {
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
-
-    public String getSymbol() { return symbol; }
-    public void setSymbol(String symbol) { this.symbol = symbol; }
 
     public double getOpen() { return open; }
     public void setOpen(double open) { this.open = open; }
