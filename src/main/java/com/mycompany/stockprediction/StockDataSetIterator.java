@@ -81,17 +81,17 @@ public class StockDataSetIterator implements DataSetIterator {
             for (int i = startIdx; i < endIdx; i++) {
                 nextData = train.get(i + 1);
                 int c = i - startIdx;
-                input.putScalar(new int[]{index, 0, c}, (curData.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
-                input.putScalar(new int[]{index, 1, c}, (curData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
-                input.putScalar(new int[]{index, 2, c}, (curData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
-                input.putScalar(new int[]{index, 3, c}, (curData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
-                input.putScalar(new int[]{index, 4, c}, (curData.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
+//                input.putScalar(new int[]{index, 0, c}, (curData.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
+                input.putScalar(new int[]{index, 0, c}, (curData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
+//                input.putScalar(new int[]{index, 2, c}, (curData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
+//                input.putScalar(new int[]{index, 3, c}, (curData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
+//                input.putScalar(new int[]{index, 4, c}, (curData.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
 
-                label.putScalar(new int[]{index, 0, c}, (nextData.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
-                label.putScalar(new int[]{index, 1, c}, (nextData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
-                label.putScalar(new int[]{index, 2, c}, (nextData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
-                label.putScalar(new int[]{index, 3, c}, (nextData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
-                label.putScalar(new int[]{index, 4, c}, (nextData.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
+//                label.putScalar(new int[]{index, 0, c}, (nextData.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
+                label.putScalar(new int[]{index, 0, c}, (nextData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
+//                label.putScalar(new int[]{index, 2, c}, (nextData.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
+//                label.putScalar(new int[]{index, 3, c}, (nextData.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
+//                label.putScalar(new int[]{index, 4, c}, (nextData.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
                 curData = nextData;
             }
             if (exampleStartOffsets.size() == 0) break;
@@ -176,19 +176,19 @@ public class StockDataSetIterator implements DataSetIterator {
             INDArray input = Nd4j.create(new int[]{exampleLength, VECTOR_SIZE}, 'f');
             for (int j = i; j < i + exampleLength; j++) {
                 StockData stock = stockDataList.get(j);
-                input.putScalar(new int[]{j - i, 0}, (stock.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
-                input.putScalar(new int[]{j - i, 1}, (stock.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
-                input.putScalar(new int[]{j - i, 2}, (stock.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
-                input.putScalar(new int[]{j - i, 3}, (stock.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
-                input.putScalar(new int[]{j - i, 4}, (stock.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
+//                input.putScalar(new int[]{j - i, 0}, (stock.getOpen() - minNum[0]) / (maxNum[0] - minNum[0]));
+                input.putScalar(new int[]{j - i, 0}, (stock.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
+//                input.putScalar(new int[]{j - i, 2}, (stock.getLow() - minNum[2]) / (maxNum[2] - minNum[2]));
+//                input.putScalar(new int[]{j - i, 3}, (stock.getHigh() - minNum[3]) / (maxNum[3] - minNum[3]));
+//                input.putScalar(new int[]{j - i, 4}, (stock.getVolume() - minNum[4]) / (maxNum[4] - minNum[4]));
             }
             StockData stock = stockDataList.get(i + exampleLength);
             INDArray label = Nd4j.create(new int[]{VECTOR_SIZE}, 'f');
-            label.putScalar(new int[]{0}, stock.getOpen());
-            label.putScalar(new int[]{1}, stock.getClose());
-            label.putScalar(new int[]{2}, stock.getLow());
-            label.putScalar(new int[]{3}, stock.getHigh());
-            label.putScalar(new int[]{4}, stock.getVolume());
+//            label.putScalar(new int[]{0}, stock.getOpen());
+            label.putScalar(new int[]{0}, stock.getClose());
+//            label.putScalar(new int[]{2}, stock.getLow());
+//            label.putScalar(new int[]{3}, stock.getHigh());
+//            label.putScalar(new int[]{4}, stock.getVolume());
             test.add(new Pair(input, label));
         }
         return test;

@@ -24,7 +24,6 @@ public class StockData {
 
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
-
     public double getOpen() { return open; }
     public void setOpen(double open) { this.open = open; }
 
