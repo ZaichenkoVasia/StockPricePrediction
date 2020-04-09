@@ -49,7 +49,7 @@ public class StockPrediction {
         File locationToSave = new File("savedModels/" + fileName);
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
         // if not use saved model, train new model
-        if (!useSavedModel) {
+        if (useSavedModel) {
             System.out.println("starting to train LSTM networks with Haar wavelet...");
             for (int i = 0; i < epochs; i++) {
                 System.out.println("training at epoch " + i);
@@ -89,22 +89,10 @@ public class StockPrediction {
             predicts[i] = net.rnnTimeStep(test.get(i).getKey()).getRow(StockPrediction.exampleLength - 1).mul(max.sub(min)).add(min);
             actuals[i] = test.get(i).getValue();
             // Calculate the MSE of results
-//            mseValue[0] += Math.pow((actuals[i].getDouble(0, 0) - predicts[i].getDouble(0, 0)), 2);
             mseValue[1] += Math.pow((actuals[i].getDouble(0, 0) - predicts[i].getDouble(0, 0)), 2);
-//            mseValue[2] += Math.pow((actuals[i].getDouble(0, 2) - predicts[i].getDouble(0, 2)), 2);
-//            mseValue[3] += Math.pow((actuals[i].getDouble(0, 3) - predicts[i].getDouble(0, 3)), 2);
-//			mseValue[4] += Math.pow((actuals[i].getDouble(0, 4) - predicts[i].getDouble(0, 4)), 2);
         }
 
-//        double mseOpen = Math.sqrt(mseValue[0] / test.size());
         double mseClose = Math.sqrt(mseValue[1] / test.size());
-//        double mseLow = Math.sqrt(mseValue[2] / test.size());
-//        double mseHigh = Math.sqrt(mseValue[3] / test.size());
-//		double mseVOLUME = Math.sqrt(mseValue[4] / test.size());
-//		System.out.println("MSE for [Open,Close,Low,High,VOLUME] is: [" + mseOpen + ", " + mseClose + ", " + mseLow + ", "
-//				+ mseHigh + ", " + mseVOLUME);
-       // System.out.println("MSE for [Open,Close,Low,High] is: [" + mseOpen + ", " + mseClose + ", " + mseLow + ", " + mseHigh + "]");
-
         System.out.println("Starting to print out values.");
         for (int i = 0; i < predicts.length; i++) {
             System.out.println("Prediction=" + predicts[i] + ", Actual=" + actuals[i]);
@@ -123,18 +111,11 @@ public class StockPrediction {
                      CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                      CSVWriter.DEFAULT_LINE_END);) {
 
-            String[] titles = {"PredictOpen", "ActualOpen", "PredictClose", "ActualClose", "PredictLow", "ActualLow", "PredictHigh", "ActualHigh"};
+            String[] titles = {"PredictClose", "ActualClose"};
             csvWriter.writeNext(titles);
             for (int i = 0; i < predicts.length; i++) {
-                //String predictOpen = String.valueOf(predicts[i].getDouble(0));
                 String predictClose = String.valueOf(predicts[i].getDouble(0));
-//                String predictLow = String.valueOf(predicts[i].getDouble(2));
-//                String predictHigh = String.valueOf(predicts[i].getDouble(3));
-
-               // String actualOpen = String.valueOf(actuals[i].getDouble(0));
                 String actualClose = String.valueOf(actuals[i].getDouble(0));
-//                String actualLow = String.valueOf(actuals[i].getDouble(2));
-//                String actualHigh = String.valueOf(actuals[i].getDouble(3));
                 csvWriter.writeNext(new String[]{predictClose, actualClose});
             }
         } catch (IOException e) {
