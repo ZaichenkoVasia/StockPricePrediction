@@ -1,6 +1,7 @@
 package com.mycompany.stockprediction;
 
 import com.mycompany.network.LSTMNetwork;
+import com.mycompany.util.DrawingTool;
 import com.opencsv.CSVWriter;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.util.ModelSerializer;
@@ -44,12 +45,12 @@ public class StockPrediction {
 
     private static void trainAndTest(StockDataSetIterator iterator, List<Pair> test) throws IOException {
         System.out.println("Build lstm networks...");
-        String fileName = "StockLSTM_Haar.zip";
-        File locationToSave = new File("savedModels/" + fileName);
+        String fileName = "StockLSTM.zip";
+        File locationToSave = new File("src/main/resources/savedModel/" + fileName);
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
         // if not use saved model, train new model
-        if (!useSavedModel) {
-            System.out.println("starting to train LSTM networks with Haar wavelet...");
+        if (useSavedModel) {
+            System.out.println("starting to train LSTM networks");
             for (int i = 0; i < epochs; i++) {
                 System.out.println("training at epoch " + i);
                 DataSet dataSet;
@@ -82,27 +83,22 @@ public class StockPrediction {
         INDArray[] predicts = new INDArray[test.size()];
         INDArray[] actuals = new INDArray[test.size()];
 
-        double[] mseValue = new double[vectorSize];
-
         for (int i = 0; i < test.size(); i++) {
             predicts[i] = net.rnnTimeStep(test.get(i).getKey()).getRow(StockPrediction.exampleLength - 1).mul(max.sub(min)).add(min);
             actuals[i] = test.get(i).getValue();
-            // Calculate the MSE of results
-            mseValue[1] += Math.pow((actuals[i].getDouble(0, 0) - predicts[i].getDouble(0, 0)), 2);
         }
 
-        double mseClose = Math.sqrt(mseValue[1] / test.size());
         System.out.println("Starting to print out values.");
         for (int i = 0; i < predicts.length; i++) {
             System.out.println("Prediction=" + predicts[i] + ", Actual=" + actuals[i]);
         }
         System.out.println("Drawing chart...");
-        plotAll(predicts, actuals);
+        saveResults(predicts, actuals);
         System.out.println("Finished drawing...");
     }
 
-    private static void plotAll(INDArray[] predicts, INDArray[] actuals) {
-        String STRING_ARRAY_SAMPLE = "E:\\dev\\code\\StockPricePrediction\\savedModels\\result.csv";
+    private static void saveResults(INDArray[] predicts, INDArray[] actuals) {
+        String STRING_ARRAY_SAMPLE = "src/main/resources/result.csv";
         try (Writer writer = Files.newBufferedWriter(Paths.get(STRING_ARRAY_SAMPLE));
              CSVWriter csvWriter = new CSVWriter(writer,
                      CSVWriter.DEFAULT_SEPARATOR,
@@ -110,13 +106,18 @@ public class StockPrediction {
                      CSVWriter.DEFAULT_ESCAPE_CHARACTER,
                      CSVWriter.DEFAULT_LINE_END);) {
 
+            double[] predictDouble = new double[predicts.length];
+            double[] actualDouble = new double[actuals.length];
             String[] titles = {"PredictClose", "ActualClose"};
             csvWriter.writeNext(titles);
             for (int i = 0; i < predicts.length; i++) {
                 String predictClose = String.valueOf(predicts[i].getDouble(0));
                 String actualClose = String.valueOf(actuals[i].getDouble(0));
                 csvWriter.writeNext(new String[]{predictClose, actualClose});
+                predictDouble[i] = predicts[i].getDouble(0);
+                actualDouble[i] = actuals[i].getDouble(0);
             }
+            DrawingTool.drawChart(predictDouble, actualDouble);
         } catch (IOException e) {
             e.printStackTrace();
         }
