@@ -38,12 +38,12 @@ public class StockPrediction {
     }
 
     private static void trainAndTest(StockDataSetIterator iterator, List<Pair> test) throws IOException {
-        System.out.println("Build lstm networks...");
+        System.out.println("Build networks...");
         File locationToSave = new File("src/main/resources/savedModel/StockLSTM.zip");
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
 
         if (useSavedModel) {
-            System.out.println("starting to train LSTM networks");
+            System.out.println("starting to train networks");
             for (int i = 0; i < epochs; i++) {
                 System.out.println("training at epoch " + i);
                 DataSet dataSet;

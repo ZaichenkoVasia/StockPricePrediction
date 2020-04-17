@@ -27,9 +27,7 @@ public class DrawingTool {
             dataIndex[i] = i;
         }
         double max = Arrays.stream(predicts).max().getAsDouble();
-        ;
         double min = Arrays.stream(predicts).min().getAsDouble();
-        ;
 
         XYSeriesCollection dataSet = new XYSeriesCollection();
         addSeries(dataSet, dataIndex, predicts, "Predicts");
