@@ -22,7 +22,6 @@ public class StockDataSetIterator implements DataSetIterator {
     private final int VECTOR_SIZE = 1;
     private int miniBatchSize;
     private int exampleLength;
-
     private double[] minNum = new double[VECTOR_SIZE];
     private double[] maxNum = new double[VECTOR_SIZE];
 
@@ -86,6 +85,59 @@ public class StockDataSetIterator implements DataSetIterator {
     }
 
     @Override
+    public boolean hasNext() {
+        return exampleStartOffsets.size() > 0;
+    }
+
+    @Override
+    public DataSet next() {
+        return next(miniBatchSize);
+    }
+
+    private List<Pair> generateTestDataSet(List<StockPrice> stockPriceList) {
+        int window = exampleLength + 1;
+        List<Pair> test = new ArrayList<>();
+        for (int i = 0; i < stockPriceList.size() - window; i++) {
+            INDArray input = Nd4j.create(new int[]{exampleLength, VECTOR_SIZE}, 'f');
+            for (int j = i; j < i + exampleLength; j++) {
+                StockPrice stock = stockPriceList.get(j);
+                input.putScalar(new int[]{j - i, 0}, (stock.getClose() - minNum[0]) / (maxNum[0] - minNum[0]));
+            }
+            StockPrice stock = stockPriceList.get(i + exampleLength);
+            INDArray label = Nd4j.create(new int[]{VECTOR_SIZE}, 'f');
+            label.putScalar(new int[]{0}, stock.getClose());
+            test.add(new Pair(input, label));
+        }
+        return test;
+    }
+
+    private List<StockPrice> readStockDataFromFile(String filename) {
+        List<StockPrice> stockPriceList = new ArrayList<>();
+        try {
+            @SuppressWarnings("resource")
+            List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
+            for (int i = 0; i < maxNum.length; i++) {
+                maxNum[i] = Double.MIN_VALUE;
+                minNum[i] = Double.MAX_VALUE;
+            }
+            for (String[] arr : list) {
+                double[] nums = new double[VECTOR_SIZE];
+                for (int i = 0; i < arr.length; i++) {
+                    nums[i] = Double.parseDouble(arr[i]);
+                    if (nums[i] > maxNum[i])
+                        maxNum[i] = nums[i];
+                    if (nums[i] < minNum[i])
+                        minNum[i] = nums[i];
+                }
+                stockPriceList.add(new StockPrice(Double.parseDouble(arr[0])));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stockPriceList;
+    }
+
+    @Override
     public int totalExamples() {
         return train.size() - exampleLength - 1;
     }
@@ -143,58 +195,5 @@ public class StockDataSetIterator implements DataSetIterator {
     @Override
     public List<String> getLabels() {
         throw new UnsupportedOperationException("Not Implemented");
-    }
-
-    @Override
-    public boolean hasNext() {
-        return exampleStartOffsets.size() > 0;
-    }
-
-    @Override
-    public DataSet next() {
-        return next(miniBatchSize);
-    }
-
-    private List<Pair> generateTestDataSet(List<StockPrice> stockPriceList) {
-        int window = exampleLength + 1;
-        List<Pair> test = new ArrayList<>();
-        for (int i = 0; i < stockPriceList.size() - window; i++) {
-            INDArray input = Nd4j.create(new int[]{exampleLength, VECTOR_SIZE}, 'f');
-            for (int j = i; j < i + exampleLength; j++) {
-                StockPrice stock = stockPriceList.get(j);
-                input.putScalar(new int[]{j - i, 0}, (stock.getClose() - minNum[0]) / (maxNum[0] - minNum[0]));
-            }
-            StockPrice stock = stockPriceList.get(i + exampleLength);
-            INDArray label = Nd4j.create(new int[]{VECTOR_SIZE}, 'f');
-            label.putScalar(new int[]{0}, stock.getClose());
-            test.add(new Pair(input, label));
-        }
-        return test;
-    }
-
-    private List<StockPrice> readStockDataFromFile(String filename) {
-        List<StockPrice> stockPriceList = new ArrayList<>();
-        try {
-            @SuppressWarnings("resource")
-            List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
-            for (int i = 0; i < maxNum.length; i++) {
-                maxNum[i] = Double.MIN_VALUE;
-                minNum[i] = Double.MAX_VALUE;
-            }
-            for (String[] arr : list) {
-                double[] nums = new double[VECTOR_SIZE];
-                for (int i = 0; i < arr.length; i++) {
-                    nums[i] = Double.parseDouble(arr[i]);
-                    if (nums[i] > maxNum[i])
-                        maxNum[i] = nums[i];
-                    if (nums[i] < minNum[i])
-                        minNum[i] = nums[i];
-                }
-                stockPriceList.add(new StockPrice(Double.parseDouble(arr[0])));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return stockPriceList;
     }
 }

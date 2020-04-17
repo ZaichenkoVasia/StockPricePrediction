@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 
 public class DrawingTool {
 
@@ -25,40 +26,27 @@ public class DrawingTool {
         for (int i = 0; i < predicts.length; i++) {
             dataIndex[i] = i;
         }
-        //calculate the maximum and minimum value of dataset
-        int max = Integer.MIN_VALUE;
-        int min = Integer.MAX_VALUE;
-        for (int i = 0; i < predicts.length; i++) {
-            if (max < (int) predicts[i]) max = (int) predicts[i];
-            if (max < (int) actuals[i]) max = (int) actuals[i];
-
-            if (min > (int) predicts[i]) min = (int) predicts[i];
-            if (min > (int) actuals[i]) min = (int) actuals[i];
-        }
+        double max = Arrays.stream(predicts).max().getAsDouble();;
+        double min = Arrays.stream(predicts).min().getAsDouble();;
 
         XYSeriesCollection dataSet = new XYSeriesCollection();
         addSeries(dataSet, dataIndex, predicts, "Predicts");
         addSeries(dataSet, dataIndex, actuals, "Actuals");
-        // instantiate JFreeChart object
         final JFreeChart chart = ChartFactory.createXYLineChart(
-                "Close prise", // title
-                "Data Index", // xAxisLabel
-                "Value", // yAxisLabel
-                dataSet, // dataset
-                PlotOrientation.VERTICAL, // orientation
-                true, // legend
-                true, // tooltips
-                false // urls
+                "Close prise",
+                "Data Index",
+                "Value",
+                dataSet,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false
         );
         XYPlot xyPlot = chart.getXYPlot();
-        // set x axis
-        final NumberAxis domainAxis = (NumberAxis) xyPlot.getDomainAxis();
-        domainAxis.setRange((int) dataIndex[0], (int) (dataIndex[dataIndex.length - 1] + 2));
-        domainAxis.setVerticalTickLabels(true);
-        // set y axis
+
         final NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
-        rangeAxis.setRange(min * 0.96, max * 1.04);
-        // Constructs a panel to display the specified chart
+        rangeAxis.setRange(0.9*min, max*1.2);
+
         final ChartPanel panel = new ChartPanel(chart);
         final JFrame jFrame = new JFrame();
         jFrame.add(panel);
