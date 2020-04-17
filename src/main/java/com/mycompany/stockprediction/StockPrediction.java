@@ -21,10 +21,10 @@ public class StockPrediction {
 
     private static final int batchSize = 64;
     private static final int exampleLength = 32;
-    private static final int epochs = 10;
+    private static final int epochs = 50;
     private static final String datasetFilename = "AAP.csv";
     private static final int firstTestItemNumber = 500;
-    private static final int testItems = 300;
+    private static final int testItems = 250;
     private static final boolean useSavedModel = false;
 
     public static void main(String[] args) throws IOException {
@@ -41,7 +41,7 @@ public class StockPrediction {
         File locationToSave = new File("src/main/resources/savedModel/StockLSTM.zip");
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
 
-        if (useSavedModel) {
+        if (!useSavedModel) {
             System.out.println("starting to train LSTM networks");
             for (int i = 0; i < epochs; i++) {
                 System.out.println("training at epoch " + i);

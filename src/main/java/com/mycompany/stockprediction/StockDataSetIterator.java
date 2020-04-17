@@ -9,10 +9,7 @@ import org.nd4j.linalg.factory.Nd4j;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 /**
  * Iterator for stock data set
@@ -43,8 +40,7 @@ public class StockDataSetIterator implements DataSetIterator {
 
     private void initializeOffsets() {
         exampleStartOffsets.clear();
-        int window = exampleLength + 1;
-        for (int i = 0; i < train.size() - window; i++) {
+        for (int i = 0; i < train.size() - exampleLength - 1; i++) {
             exampleStartOffsets.add(i);
         }
     }
@@ -95,9 +91,8 @@ public class StockDataSetIterator implements DataSetIterator {
     }
 
     private List<Pair> generateTestDataSet(List<StockPrice> stockPriceList) {
-        int window = exampleLength + 1;
         List<Pair> test = new ArrayList<>();
-        for (int i = 0; i < stockPriceList.size() - window; i++) {
+        for (int i = 0; i < stockPriceList.size() - exampleLength - 1; i++) {
             INDArray input = Nd4j.create(new int[]{exampleLength, VECTOR_SIZE}, 'f');
             for (int j = i; j < i + exampleLength; j++) {
                 StockPrice stock = stockPriceList.get(j);
@@ -114,23 +109,16 @@ public class StockDataSetIterator implements DataSetIterator {
     private List<StockPrice> readStockDataFromFile(String filename) {
         List<StockPrice> stockPriceList = new ArrayList<>();
         try {
-            @SuppressWarnings("resource")
             List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
-            for (int i = 0; i < maxNum.length; i++) {
-                maxNum[i] = Double.MIN_VALUE;
-                minNum[i] = Double.MAX_VALUE;
-            }
-            for (String[] arr : list) {
-                double[] nums = new double[VECTOR_SIZE];
-                for (int i = 0; i < arr.length; i++) {
-                    nums[i] = Double.parseDouble(arr[i]);
-                    if (nums[i] > maxNum[i])
-                        maxNum[i] = nums[i];
-                    if (nums[i] < minNum[i])
-                        minNum[i] = nums[i];
-                }
-                stockPriceList.add(new StockPrice(Double.parseDouble(arr[0])));
-            }
+            list.forEach(arr-> stockPriceList.add(new StockPrice(Double.parseDouble(arr[0]))));
+
+            stockPriceList.stream()
+                    .max(Comparator.comparingDouble(StockPrice::getClose))
+                    .ifPresent(maxValue -> maxNum[0] = maxValue.getClose());
+            stockPriceList.stream()
+                    .min(Comparator.comparingDouble(StockPrice::getClose))
+                    .ifPresent(minValue -> minNum[0] = minValue.getClose());
+
         } catch (IOException e) {
             e.printStackTrace();
         }

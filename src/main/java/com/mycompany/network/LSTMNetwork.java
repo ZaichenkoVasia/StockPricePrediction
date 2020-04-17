@@ -21,18 +21,16 @@ public class LSTMNetwork {
     private static final int DENSE_LAYER_SIZE = 32;
     private static final int TRUNCATED_BPTT_LENGTH = 32;
     private static final double DROPOUT_RATIO = 0.2;
-    private static final double RMS_DECAY = 0.95;
 	public static final double LEARNING_RATE = 0.05;
 
     public static MultiLayerNetwork buildLSTMNetwork (int nIn, int nOut) {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(SEED)
                 .iterations(ITERATIONS)
-                .learningRate(LEARNING_RATE) // get learning rate from configuration file
+                .learningRate(LEARNING_RATE)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .weightInit(WeightInit.XAVIER)
                 .updater(Updater.RMSPROP)
-                .rmsDecay(RMS_DECAY)
                 .regularization(true)
                 .l2(1e-4)
                 .list()
