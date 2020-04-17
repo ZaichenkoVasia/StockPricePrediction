@@ -1,6 +1,5 @@
 package com.mycompany.stockprediction;
 
-import com.mycompany.wavelet.WaveletProcessor;
 import com.opencsv.CSVReader;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
@@ -20,8 +19,7 @@ import java.util.NoSuchElementException;
  */
 public class StockDataSetIterator implements DataSetIterator {
 
-    private static final long serialVersionUID = 3308369164873684000L;
-    private final int VECTOR_SIZE = 5;
+    private final int VECTOR_SIZE = 1;
     private int miniBatchSize;
     private int exampleLength;
 
@@ -30,20 +28,17 @@ public class StockDataSetIterator implements DataSetIterator {
 
     private LinkedList<Integer> exampleStartOffsets = new LinkedList<>();
 
-    private List<StockData> train;
+    private List<StockPrice> train;
     private List<Pair> test;
 
-    public StockDataSetIterator(String filename, String symbol, int miniBatchSize, int exampleLength, int firstTestItemNumber, int testItems) {
-        List<StockData> stockDataList = readStockDataFromFile(filename, symbol);
+    public StockDataSetIterator(String filename, int miniBatchSize, int exampleLength, int firstTestItemNumber, int testItems) {
+        List<StockPrice> stockPriceList = readStockDataFromFile(filename);
         this.miniBatchSize = miniBatchSize;
         this.exampleLength = exampleLength;
-//        int split = (int) Math.round(stockDataList.size() * splitRatio);
-//        train = stockDataList.subList(0, split);
-        train = stockDataList.subList(0, firstTestItemNumber);
 
-        WaveletProcessor.processor(train);
+        train = stockPriceList.subList(0, firstTestItemNumber);
 
-        test = generateTestDataSet(stockDataList.subList(firstTestItemNumber, firstTestItemNumber + testItems));
+        test = generateTestDataSet(stockPriceList.subList(firstTestItemNumber, firstTestItemNumber + testItems));
         initializeOffsets();
     }
 
@@ -76,13 +71,13 @@ public class StockDataSetIterator implements DataSetIterator {
         for (int index = 0; index < actualMiniBatchSize; index++) {
             int startIdx = exampleStartOffsets.removeFirst();
             int endIdx = startIdx + exampleLength;
-            StockData curData = train.get(startIdx);
-            StockData nextData;
+            StockPrice curData = train.get(startIdx);
+            StockPrice nextData;
             for (int i = startIdx; i < endIdx; i++) {
                 nextData = train.get(i + 1);
                 int c = i - startIdx;
-                input.putScalar(new int[]{index, 0, c}, (curData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
-                label.putScalar(new int[]{index, 0, c}, (nextData.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
+                input.putScalar(new int[]{index, 0, c}, (curData.getClose() - minNum[0]) / (maxNum[0] - minNum[0]));
+                label.putScalar(new int[]{index, 0, c}, (nextData.getClose() - minNum[0]) / (maxNum[0] - minNum[0]));
                 curData = nextData;
             }
             if (exampleStartOffsets.size() == 0) break;
@@ -160,16 +155,16 @@ public class StockDataSetIterator implements DataSetIterator {
         return next(miniBatchSize);
     }
 
-    private List<Pair> generateTestDataSet(List<StockData> stockDataList) {
+    private List<Pair> generateTestDataSet(List<StockPrice> stockPriceList) {
         int window = exampleLength + 1;
         List<Pair> test = new ArrayList<>();
-        for (int i = 0; i < stockDataList.size() - window; i++) {
+        for (int i = 0; i < stockPriceList.size() - window; i++) {
             INDArray input = Nd4j.create(new int[]{exampleLength, VECTOR_SIZE}, 'f');
             for (int j = i; j < i + exampleLength; j++) {
-                StockData stock = stockDataList.get(j);
-                input.putScalar(new int[]{j - i, 0}, (stock.getClose() - minNum[1]) / (maxNum[1] - minNum[1]));
+                StockPrice stock = stockPriceList.get(j);
+                input.putScalar(new int[]{j - i, 0}, (stock.getClose() - minNum[0]) / (maxNum[0] - minNum[0]));
             }
-            StockData stock = stockDataList.get(i + exampleLength);
+            StockPrice stock = stockPriceList.get(i + exampleLength);
             INDArray label = Nd4j.create(new int[]{VECTOR_SIZE}, 'f');
             label.putScalar(new int[]{0}, stock.getClose());
             test.add(new Pair(input, label));
@@ -177,8 +172,8 @@ public class StockDataSetIterator implements DataSetIterator {
         return test;
     }
 
-    private List<StockData> readStockDataFromFile(String filename, String symbol) {
-        List<StockData> stockDataList = new ArrayList<>();
+    private List<StockPrice> readStockDataFromFile(String filename) {
+        List<StockPrice> stockPriceList = new ArrayList<>();
         try {
             @SuppressWarnings("resource")
             List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
@@ -187,20 +182,19 @@ public class StockDataSetIterator implements DataSetIterator {
                 minNum[i] = Double.MAX_VALUE;
             }
             for (String[] arr : list) {
-                if (!arr[1].equals(symbol)) continue;
                 double[] nums = new double[VECTOR_SIZE];
-                for (int i = 0; i < arr.length - 2; i++) {
-                    nums[i] = Double.parseDouble(arr[i + 2]);
+                for (int i = 0; i < arr.length; i++) {
+                    nums[i] = Double.parseDouble(arr[i]);
                     if (nums[i] > maxNum[i])
                         maxNum[i] = nums[i];
                     if (nums[i] < minNum[i])
                         minNum[i] = nums[i];
                 }
-                stockDataList.add(new StockData(arr[0], arr[1], nums[0], nums[1], nums[2], nums[3], nums[4]));
+                stockPriceList.add(new StockPrice(Double.parseDouble(arr[0])));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return stockDataList;
+        return stockPriceList;
     }
 }

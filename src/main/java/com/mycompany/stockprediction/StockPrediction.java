@@ -20,12 +20,11 @@ public class StockPrediction {
 
     private static final int batchSize = 64;
     private static final int exampleLength = 32;
-    private static final int epochs = 60;
+    private static final int epochs = 10;
     private static final int vectorSize = 4;
-    private static final String datasetFilename = "NY-StockExchange.csv";
-    private static final String stockName = "AAPL";
-    private static final int firstTestItemNumber = 1024;
-    private static final int testItems = 500;
+    private static final String datasetFilename = "AAP.csv";
+    private static final int firstTestItemNumber = 500;
+    private static final int testItems = 300;
     private static final boolean useSavedModel = false;
 
     public static void main(String[] args) throws IOException {
@@ -34,7 +33,7 @@ public class StockPrediction {
         String file = new ClassPathResource(datasetFilename).getFile().getAbsolutePath();
 
         System.out.println("Create dataSet iterator...");
-        StockDataSetIterator iterator = new StockDataSetIterator(file, stockName, batchSize, exampleLength,
+        StockDataSetIterator iterator = new StockDataSetIterator(file, batchSize, exampleLength,
                 firstTestItemNumber, testItems);
 
         System.out.println("Load test dataset...");
@@ -49,7 +48,7 @@ public class StockPrediction {
         File locationToSave = new File("savedModels/" + fileName);
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
         // if not use saved model, train new model
-        if (useSavedModel) {
+        if (!useSavedModel) {
             System.out.println("starting to train LSTM networks with Haar wavelet...");
             for (int i = 0; i < epochs; i++) {
                 System.out.println("training at epoch " + i);
