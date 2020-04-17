@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class StockPrediction {
@@ -41,7 +42,7 @@ public class StockPrediction {
         File locationToSave = new File("src/main/resources/savedModel/StockLSTM.zip");
         MultiLayerNetwork net = LSTMNetwork.buildLSTMNetwork(iterator.inputColumns(), iterator.totalOutcomes());
 
-        if (!useSavedModel) {
+        if (useSavedModel) {
             System.out.println("starting to train LSTM networks");
             for (int i = 0; i < epochs; i++) {
                 System.out.println("training at epoch " + i);
@@ -100,8 +101,19 @@ public class StockPrediction {
                 actualDouble[i] = actuals[i].getDouble(0);
             }
             DrawingTool.drawChart(predictDouble, actualDouble);
+            double averageDeviation = evaluation(predictDouble, actualDouble);
+            System.out.println("Average deviations = " + averageDeviation + "%");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static double evaluation(double[] predict, double[] actual) {
+        List<Double> deviations = new ArrayList<>();
+        for (int i = 0; i < predict.length; i++) {
+            double deviation = Math.abs((predict[i] - actual[i]) / actual[i]) * 100;
+            deviations.add(deviation);
+        }
+        return deviations.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
     }
 }

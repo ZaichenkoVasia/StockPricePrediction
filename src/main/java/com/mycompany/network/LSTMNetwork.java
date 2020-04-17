@@ -14,16 +14,16 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 public class LSTMNetwork {
-	private static final int SEED = 12345;
-	private static final int ITERATIONS = 1;
+    private static final int SEED = 12345;
+    private static final int ITERATIONS = 1;
     private static final int LAYER_1_SIZE = 256;
     private static final int LAYER_2_SIZE = 256;
     private static final int DENSE_LAYER_SIZE = 32;
     private static final int TRUNCATED_BPTT_LENGTH = 32;
     private static final double DROPOUT_RATIO = 0.2;
-	public static final double LEARNING_RATE = 0.05;
+    public static final double LEARNING_RATE = 0.05;
 
-    public static MultiLayerNetwork buildLSTMNetwork (int nIn, int nOut) {
+    public static MultiLayerNetwork buildLSTMNetwork(int nIn, int nOut) {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(SEED)
                 .iterations(ITERATIONS)
@@ -49,10 +49,10 @@ public class LSTMNetwork {
                         .dropOut(DROPOUT_RATIO)
                         .build())
                 .layer(2, new DenseLayer.Builder()
-                		.nIn(LAYER_2_SIZE)
-                		.nOut(DENSE_LAYER_SIZE)
-                		.activation(Activation.RELU)
-                		.build())
+                        .nIn(LAYER_2_SIZE)
+                        .nOut(DENSE_LAYER_SIZE)
+                        .activation(Activation.RELU)
+                        .build())
                 .layer(3, new RnnOutputLayer.Builder()
                         .nIn(DENSE_LAYER_SIZE)
                         .nOut(nOut)

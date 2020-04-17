@@ -11,9 +11,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
-/**
- * Iterator for stock data set
- */
 public class StockDataSetIterator implements DataSetIterator {
 
     private final int VECTOR_SIZE = 1;
@@ -36,6 +33,25 @@ public class StockDataSetIterator implements DataSetIterator {
 
         test = generateTestDataSet(stockPriceList.subList(firstTestItemNumber, firstTestItemNumber + testItems));
         initializeOffsets();
+    }
+
+    private List<StockPrice> readStockDataFromFile(String filename) {
+        List<StockPrice> stockPriceList = new ArrayList<>();
+        try {
+            List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
+            list.forEach(arr -> stockPriceList.add(new StockPrice(Double.parseDouble(arr[0]))));
+
+            stockPriceList.stream()
+                    .max(Comparator.comparingDouble(StockPrice::getClose))
+                    .ifPresent(maxValue -> maxNum[0] = maxValue.getClose());
+            stockPriceList.stream()
+                    .min(Comparator.comparingDouble(StockPrice::getClose))
+                    .ifPresent(minValue -> minNum[0] = minValue.getClose());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stockPriceList;
     }
 
     private void initializeOffsets() {
@@ -104,25 +120,6 @@ public class StockDataSetIterator implements DataSetIterator {
             test.add(new Pair(input, label));
         }
         return test;
-    }
-
-    private List<StockPrice> readStockDataFromFile(String filename) {
-        List<StockPrice> stockPriceList = new ArrayList<>();
-        try {
-            List<String[]> list = new CSVReader(new FileReader(filename)).readAll();
-            list.forEach(arr-> stockPriceList.add(new StockPrice(Double.parseDouble(arr[0]))));
-
-            stockPriceList.stream()
-                    .max(Comparator.comparingDouble(StockPrice::getClose))
-                    .ifPresent(maxValue -> maxNum[0] = maxValue.getClose());
-            stockPriceList.stream()
-                    .min(Comparator.comparingDouble(StockPrice::getClose))
-                    .ifPresent(minValue -> minNum[0] = minValue.getClose());
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return stockPriceList;
     }
 
     @Override

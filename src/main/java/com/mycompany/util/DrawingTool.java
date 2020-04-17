@@ -26,8 +26,10 @@ public class DrawingTool {
         for (int i = 0; i < predicts.length; i++) {
             dataIndex[i] = i;
         }
-        double max = Arrays.stream(predicts).max().getAsDouble();;
-        double min = Arrays.stream(predicts).min().getAsDouble();;
+        double max = Arrays.stream(predicts).max().getAsDouble();
+        ;
+        double min = Arrays.stream(predicts).min().getAsDouble();
+        ;
 
         XYSeriesCollection dataSet = new XYSeriesCollection();
         addSeries(dataSet, dataIndex, predicts, "Predicts");
@@ -45,7 +47,7 @@ public class DrawingTool {
         XYPlot xyPlot = chart.getXYPlot();
 
         final NumberAxis rangeAxis = (NumberAxis) xyPlot.getRangeAxis();
-        rangeAxis.setRange(0.9*min, max*1.2);
+        rangeAxis.setRange(0.9 * min, max * 1.2);
 
         final ChartPanel panel = new ChartPanel(chart);
         final JFrame jFrame = new JFrame();
